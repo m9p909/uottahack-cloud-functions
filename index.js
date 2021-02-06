@@ -14,11 +14,19 @@ const defaultAuth = fbapp.auth();
 
 let app = express();
 
+function getUserID(smallId){
+  //TODO get id from database
+  return 1;
+}
+
 function validateReq(req, res, next) {
-  defaultAuth.verifyIdToken(req.header("authToken")).then((decodedToken) => {
-    let uid = decodedToken.uid;
-    res.locals.userid = uid;
-  });
+
+  if(req.header("nanoid")){
+    res.local.userID = getUserID(req.header("nanoid"));
+  } else {
+    res.status(404).send({ message: "smallID not found" });
+  }
+  
 
   let imagestring = req.body.image;
   if (!("image" in req.body)) {
@@ -40,13 +48,14 @@ app.get("/", (req, res) => {
   req.status(200).send("The server is running");
 });
 
-function saveImagetoDB(gcpath) {}
 
 app.post("/", validateReq, (req, res) => {
   let filename = nanoid();
-  let output = req.body;
+  let output = req.body.image;
+  output = output.split("base64,")[1];
 
-  fs.writeFileSync(path.join(os.tmpdir(), filename), output);
+
+  fs.writeFileSync(path.join(os.tmpdir(), filename), output, {encoding: "base64"});
 
   try {
     saveToGCP(path.join(os.tmpdir(), filename), filename).then((gcpath) => {
