@@ -14,8 +14,10 @@ var config = {
 
 var pool = new pg.Pool(config);
 
-
-function getUserID(smallId) {
+function getQuery(name){
+    return fs.readFileSync('./sql/'+name).toString();
+}
+export function getUserID(smallId) {
   pool.connect((err, client, done) => {
     // Close communication with the database and exit.
     var finish = function () {
@@ -26,6 +28,23 @@ function getUserID(smallId) {
         console.error('could not connect to cockroachdb', err);
         finish();
     }
+    client.query(getQuery("getUUID.sql"))
+
+  });
+}
+
+export function postImage(userUUID) {
+  pool.connect((err, client, done) => {
+    // Close communication with the database and exit.
+    var finish = function () {
+      done();
+      process.exit();
+    };
+    if (err) {
+        console.error('could not connect to cockroachdb', err);
+        finish();
+    }
+    client.query(getQuery("postImage.sql"))
 
   });
 }

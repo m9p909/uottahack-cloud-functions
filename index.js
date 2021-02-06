@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import saveToGCP from "./google-cloud-stuff.js";
 import isBase64 from "is-base64";
 import admin from "firebase-admin";
+import {postImage, getUserID} from './database-functions'
 
 const fbapp = admin.initializeApp();
 const defaultAuth = fbapp.auth();
@@ -19,15 +20,15 @@ function getUserID(smallId){
   return 1;
 }
 
-function validateReq(req, res, next) {
-
+function validatePicturePostReq(req, res, next) {
+  //check header, and verify nanoid
   if(req.header("nanoid")){
-    res.local.userID = getUserID(req.header("nanoid"));
+    res.local.smallID = getUserID(req.header("nanoid"));
   } else {
     res.status(404).send({ message: "smallID not found" });
   }
   
-
+  //verify image
   let imagestring = req.body.image;
   if (!("image" in req.body)) {
     res.status(404).send({ message: "image data not found" });
@@ -49,18 +50,19 @@ app.get("/", (req, res) => {
 });
 
 
-app.post("/", validateReq, (req, res) => {
+app.post("/picture", validatePicturePostReq, (req, res) => {
   let filename = nanoid();
   let output = req.body.image;
+  //split the mimetype and data
   output = output.split("base64,")[1];
 
-
+  //write image to file
   fs.writeFileSync(path.join(os.tmpdir(), filename), output, {encoding: "base64"});
 
   try {
     saveToGCP(path.join(os.tmpdir(), filename), filename).then((gcpath) => {
       fs.unlinkSync(path.join(os.tmpdir(), filename));
-
+      postImage(res.local.smallID)
       let response = {
         success: false,
         score: -1,
@@ -72,8 +74,8 @@ app.post("/", validateReq, (req, res) => {
   }
 });
 
-app.listen(8081, () => {
-  console.log(`App listening on port 8080`);
+app.listen(4000, () => {
+  console.log(`App listening on port 4000`);
   console.log("Press Ctrl+C to quit.");
 });
 console.log("stuff");
