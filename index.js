@@ -8,17 +8,13 @@ import { nanoid } from "nanoid";
 import saveToGCP from "./google-cloud-stuff.js";
 import isBase64 from "is-base64";
 import admin from "firebase-admin";
-import {postImage, getUserID} from './database-functions'
+import {postImage, getUserID} from './database-functions.js'
 
 const fbapp = admin.initializeApp();
 const defaultAuth = fbapp.auth();
 
 let app = express();
 
-function getUserID(smallId){
-  //TODO get id from database
-  return 1;
-}
 
 function validatePicturePostReq(req, res, next) {
   //check header, and verify nanoid
@@ -54,7 +50,6 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
   let filename = nanoid();
   let output = req.body.image;
   //split the mimetype and data
-  output = output.split("base64,")[1];
 
   //write image to file
   fs.writeFileSync(path.join(os.tmpdir(), filename), output, {encoding: "base64"});
