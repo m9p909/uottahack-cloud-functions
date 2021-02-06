@@ -16,13 +16,17 @@ const defaultAuth = fbapp.auth();
 let app = express();
 
 
-function validatePicturePostReq(req, res, next) {
+async function  validatePicturePostReq(req, res, next) {
   //check header, and verify nanoid
+  try{
   if(req.header("nanoid")){
-    res.locals.smallID = getUserID(req.header("nanoid"));
+    res.locals.smallID = await getUserID(req.header("nanoid"));
+    if(!res.locals.smallID) res.status(404).send({ message: "user does not exist" }); 
   } else {
     res.status(404).send({ message: "smallID not found" });
   }
+
+  
   
   //verify image
   let imagestring = req.body.image;
@@ -35,6 +39,10 @@ function validatePicturePostReq(req, res, next) {
     isBase64(imagestring, { allowEmpty: false })
   ) {
     res.status(404).send({ message: "invalid image data" });
+    return;
+  }}
+  catch(err) {
+    res.status(500).send({ message: "data verification server error" });
     return;
   }
 
@@ -70,8 +78,7 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
         console.log(result.rows[0].imageurl + " was saved to db");
       })
       let response = {
-        success: false,
-        score: -1,
+        success: true,
       };
       res.send(response);
     });

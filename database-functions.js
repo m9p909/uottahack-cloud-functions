@@ -17,20 +17,9 @@ var pool = new pg.Pool(config);
 function getQuery(name){
     return fs.readFileSync('./sql/'+name).toString();
 }
-export function getUserID(smallId) {
-  pool.connect((err, client, done) => {
-    // Close communication with the database and exit.
-    var finish = function () {
-      done();
-      process.exit();
-    };
-    if (err) {
-        console.error('could not connect to cockroachdb', err);
-        finish();
-    }
-    client.query(getQuery("getuuid.sql"))
-
-  });
+export async function  getUserID(smallId) {
+  let result =  await pool.query(getQuery("getuuid.sql"),[smallId]);
+  return result.rows ? result.rows[0].id : null;
 }
 
 export async function postImage(userUUID, url) {
