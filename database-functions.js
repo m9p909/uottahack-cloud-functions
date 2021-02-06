@@ -33,18 +33,9 @@ export function getUserID(smallId) {
   });
 }
 
-export function postImage(userUUID) {
-  pool.connect((err, client, done) => {
-    // Close communication with the database and exit.
-    var finish = function () {
-      done();
-      process.exit();
-    };
-    if (err) {
-        console.error('could not connect to cockroachdb', err);
-        finish();
-    }
-    client.query(getQuery("postImage.sql"))
-
-  });
+export async function postImage(userUUID, url) {
+  let result;
+  result = await pool.query(getQuery("postImage.sql"),[userUUID, url]);
+  return result;
 }
+  

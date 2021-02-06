@@ -66,7 +66,9 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
   try {
     saveToGCP(path.join(os.tmpdir(), filename), filename).then((gcpath) => {
       fs.unlinkSync(path.join(os.tmpdir(), filename));
-      postImage(res.locals.smallID)
+      postImage(res.locals.smallID, gcpath).then((result) => {
+        console.log(result.rows[0].imageurl + " was saved to db");
+      })
       let response = {
         success: false,
         score: -1,
