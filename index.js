@@ -9,11 +9,10 @@ import { nanoid } from "nanoid";
 //import saveToGCP from "./google-cloud-stuff.js";
 import isBase64 from "is-base64";
 import admin from "firebase-admin";
-
-
+import async from 'async'
 
 let app = express();
-let db = admin.initializeApp()
+let adm = admin.initializeApp()
 
 function validateReq(req, res, next) {
 
@@ -48,27 +47,7 @@ app.get("/", (req, res) => {
 });
 
 
-let session = {
-  authUid: null,
-  authToken: null
-}
 
-app.post('/new_user', async function (req, res, next) {
-
-  await admin.auth().verifyIdToken(req.query.token).then((decodedToken) => {
-    session.authToken = req.query.token
-    session.authUid = decodedToken.uid
-    console.log(session.authUid.trim())
-    
-
-  })
-    .catch((error) => {
-      console.log(error)
-    });
-
-});
-
-/*
 
 app.post("/", validateReq, (req, res) => {
   let filename = nanoid();
@@ -76,7 +55,7 @@ app.post("/", validateReq, (req, res) => {
   output = output.split("base64,")[1];
 
 
-  fs.writeFileSync(path.join(os.tmpdir(), filename), output, {encoding: "base64"});
+  fs.writeFileSync(path.join(os.tmpdir(), filename), output, { encoding: "base64" });
 
   try {
     saveToGCP(path.join(os.tmpdir(), filename), filename).then((gcpath) => {
@@ -92,7 +71,32 @@ app.post("/", validateReq, (req, res) => {
     res.status(500).send(err);
   }
 });
-*/
+
+
+let session = {
+  authUid: null,
+  authToken: null,
+  nanoId: null
+}
+
+
+
+app.post('/new_user', async function (req, res, next) {
+
+  await admin.auth().verifyIdToken(req.query.token).then((decodedToken) => {
+
+    session.authToken = req.query.token
+    session.authUid = decodedToken.uid
+    session.nanoId = " "
+  })
+    .catch((error) => {
+      console.log(error)
+    });
+
+});
+
+
+
 
 app.listen(8081, () => {
   console.log(`App listening on port 8080`);

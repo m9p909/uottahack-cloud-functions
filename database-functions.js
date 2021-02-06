@@ -31,5 +31,22 @@ export default function getUserID(smallId) {
   });
 }
 
+export default function insert(session) {
+
+  pool.connect((err, client, done) => {
+    // Close communication with the database and exit.
+    var finish = function () {
+      client.query('INSERT INTO accounts (uuid, nanoid) VALUES (1, 1000);', next);
+      done();
+      process.exit();
+    };
+    if (err) {
+      console.error('could not connect to cockroachdb', err);
+      finish();
+    }
+
+  });
+}
+
 
 
