@@ -1,13 +1,15 @@
-// import  Storage  from '@google-cloud/storage';
-// import axios from 'axios';
+import Storage from '@google-cloud/storage';
+import axios from 'axios';
 
-// const storage = new Storage.Storage();
+const storage = new Storage.Storage();
 
-// export default async function saveToGCP(path, filename) {
-//   const bucketName = "images90"
+export default async function saveToGCP(path, filename) {
+  const bucketName = "images90"
 
-//   let response = await storage.bucket(bucketName).upload(path);
+  let response = await storage.bucket(bucketName).upload(path);
 
-//   console.log(`${path} uploaded to ${bucketName}.`);
-//   return "gs://imageshtn/" + filename;
-// }
+  console.log(`${path} uploaded to ${bucketName}.`);
+  return "gs://imageshtn/" + filename;
+
+
+}

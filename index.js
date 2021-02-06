@@ -10,16 +10,10 @@ import { nanoid } from "nanoid";
 import isBase64 from "is-base64";
 import admin from "firebase-admin";
 
-const fbapp = admin.initializeApp();
-const defaultAuth = fbapp.auth();
+
 
 let app = express();
-
-function getUserID(smallId) {
-
-  //TODO get id from database
-  return 1;
-}
+let db = admin.initializeApp()
 
 function validateReq(req, res, next) {
 
@@ -51,6 +45,27 @@ app.use(bodyParser.json());
 app.get("/", (req, res) => {
 
   req.status(200).send("The server is running");
+});
+
+
+let session = {
+  authUid: null,
+  authToken: null
+}
+
+app.post('/new_user', async function (req, res, next) {
+
+  await admin.auth().verifyIdToken(req.query.token).then((decodedToken) => {
+    session.authToken = req.query.token
+    session.authUid = decodedToken.uid
+    console.log(session.authUid.trim())
+    
+
+  })
+    .catch((error) => {
+      console.log(error)
+    });
+
 });
 
 /*
