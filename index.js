@@ -4,8 +4,9 @@ import express from "express";
 import fs from "fs";
 import os from "os";
 import path from "path";
+
 import { nanoid } from "nanoid";
-import saveToGCP from "./google-cloud-stuff.js";
+//import saveToGCP from "./google-cloud-stuff.js";
 import isBase64 from "is-base64";
 import admin from "firebase-admin";
 
@@ -14,19 +15,20 @@ const defaultAuth = fbapp.auth();
 
 let app = express();
 
-function getUserID(smallId){
+function getUserID(smallId) {
+
   //TODO get id from database
   return 1;
 }
 
 function validateReq(req, res, next) {
 
-  if(req.header("nanoid")){
+  if (req.header("nanoid")) {
     res.local.userID = getUserID(req.header("nanoid"));
   } else {
     res.status(404).send({ message: "smallID not found" });
   }
-  
+
 
   let imagestring = req.body.image;
   if (!("image" in req.body)) {
@@ -43,11 +45,15 @@ function validateReq(req, res, next) {
 
   next();
 }
+//no index.j
+//
 app.use(bodyParser.json());
 app.get("/", (req, res) => {
+
   req.status(200).send("The server is running");
 });
 
+/*
 
 app.post("/", validateReq, (req, res) => {
   let filename = nanoid();
@@ -71,6 +77,7 @@ app.post("/", validateReq, (req, res) => {
     res.status(500).send(err);
   }
 });
+*/
 
 app.listen(8081, () => {
   console.log(`App listening on port 8080`);
