@@ -28,7 +28,7 @@ export function getUserID(smallId) {
         console.error('could not connect to cockroachdb', err);
         finish();
     }
-    client.query(getQuery("getUUID.sql"))
+    client.query(getQuery("getuuid.sql"))
 
   });
 }

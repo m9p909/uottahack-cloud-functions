@@ -19,7 +19,7 @@ let app = express();
 function validatePicturePostReq(req, res, next) {
   //check header, and verify nanoid
   if(req.header("nanoid")){
-    res.local.smallID = getUserID(req.header("nanoid"));
+    res.locals.smallID = getUserID(req.header("nanoid"));
   } else {
     res.status(404).send({ message: "smallID not found" });
   }
@@ -47,9 +47,16 @@ app.get("/", (req, res) => {
 
 
 app.post("/picture", validatePicturePostReq, (req, res) => {
-  let filename = nanoid();
+  
+  
   let output = req.body.image;
   //split the mimetype and data
+  
+  let filetype = "";
+  filetype = output.match("\\w*\\;")[0];
+  filetype.split(0,-1);
+  output = output.split("base64,")[1]
+  let filename = nanoid()+"."+filetype;
 
   //write image to file
   fs.writeFileSync(path.join(os.tmpdir(), filename), output, {encoding: "base64"});
@@ -57,7 +64,7 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
   try {
     saveToGCP(path.join(os.tmpdir(), filename), filename).then((gcpath) => {
       fs.unlinkSync(path.join(os.tmpdir(), filename));
-      postImage(res.local.smallID)
+      postImage(res.locals.smallID)
       let response = {
         success: false,
         score: -1,
