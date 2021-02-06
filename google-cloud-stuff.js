@@ -9,5 +9,5 @@ export default async function saveToGCP(path, filename) {
   let response = await storage.bucket(bucketName).upload(path);
   
   console.log(`${path} uploaded to ${bucketName}.`);
-  return "gs://imageshtn/" + filename;
+  return `https://storage.googleapis.com/${bucketName}/` + filename;
 }

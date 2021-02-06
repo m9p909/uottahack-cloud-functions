@@ -53,8 +53,10 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
   //split the mimetype and data
   
   let filetype = "";
+  //get the mimetype
   filetype = output.match("\\w*\\;")[0];
-  filetype.split(0,-1);
+  filetype = filetype.replace(';','');
+  //remove mimetype
   output = output.split("base64,")[1]
   let filename = nanoid()+"."+filetype;
 
