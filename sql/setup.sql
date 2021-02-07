@@ -1,14 +1,14 @@
 CREATE DATABASE IF NOT EXISTS imageapp;
 SET DATABASE = imageapp;
-CREATE TABLE accounts(
-    id UUID not null unique default,
+CREATE TABLE users(
+    id text not null unique default,
     email text,
     primary KEY(id),
     smallid text
 );
 create table images(
 	id UUID not null unique default gen_random_uuid(),
-	user_id UUID,
+	user_id text,
 	imageURL text,
 	primary KEY(id)
 )
