@@ -56,8 +56,9 @@ async function validatePicturePostReq(req, res, next) {
 app.use(bodyParser.json({ limit: "50mb" }));
 
 // endpoints
+
 app.get("/", (req, res) => {
-  req.status(200).send("The server is running");
+  res.status(200).send("The server is running");
 });
 
 app.post("/picture", validatePicturePostReq, (req, res) => {
@@ -65,7 +66,22 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
   let text;
   if (req.body.text) {
     text = req.body.text;
+  } else if(!output){
+    res.status(400).send("missing data");
+    return;
   }
+
+  if(!output){
+    postImage(res.locals.smallID, null, text).then((result) => {
+      console.log( text+ " was saved to db(no picture)");
+    });
+    let response = {
+      success: true,
+    };
+    res.send(response);
+    return;
+  }
+  
 
   //split the mimetype and data
   let filetype = "";
@@ -166,7 +182,7 @@ app.get("/nanoid", validateGoogleJWT, (req, res) => {
   }
 });
 //local test
-
+/*
 const PORT = 2020;
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
@@ -174,5 +190,8 @@ app.listen(PORT, () => {
 });
 console.log("stuff");
 console.log(process.version);
+*/
+
+
 
 exports.app = app;
