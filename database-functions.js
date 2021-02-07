@@ -1,5 +1,6 @@
 const pg = require('pg')
 const fs = require('fs');
+const { nanoid } = require('nanoid');
 
 var config = {
   user: "maxroach",
@@ -29,4 +30,22 @@ async function postImage(userUUID, url, text) {
   return result;
 }
 
-module.exports = {getUserID,postImage};
+async function newUser(userUUID){
+  let smallid = nanoid(5)
+  let result = await pool.query(getQuery("newuser.sql"), [userUUID, smallid])
+  console.log(`made a new user with ${smallid} and ${userUUID}`)
+  return smallid;
+}
+
+async function getPictureData(userUUID){
+  let result = await pool.query(getQuery('getInfo.sql'),[userUUID])
+  return result.rows;
+  
+}
+async function getNanoID(userUUID){
+  let result = await pool.query(getQuery('getshortid.sql'),[userUUID])
+  return result.rows.length > 0 ? result.rows[0].smallid : null;
+  
+}
+
+module.exports = {getUserID,postImage,newUser, getPictureData, getNanoID};

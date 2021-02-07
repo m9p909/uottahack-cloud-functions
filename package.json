@@ -20,7 +20,8 @@
     "nanoid": "^3.1.20",
     "node-base64-image": "^2.0.3",
     "pg": "^8.5.1",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "uuid4": "^2.0.2"
   },
   "scripts": {
     "dev": "nodemon index.js"

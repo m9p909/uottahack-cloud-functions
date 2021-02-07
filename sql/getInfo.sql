@@ -1,0 +1,1 @@
+SELECT imageurl, info FROM images where user_id = $1

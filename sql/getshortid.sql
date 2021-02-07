@@ -1,0 +1,1 @@
+select smallid from users where id = $1

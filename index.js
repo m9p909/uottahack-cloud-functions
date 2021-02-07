@@ -2,13 +2,20 @@
 const bodyParser = require("body-parser");
 const express = require("express");
 const fs = require("fs");
-const os = require("os")
+const os = require("os");
 const path = require("path");
-const {nanoid} = require("nanoid");
-const {saveToGCP} = require("./google-cloud-stuff.js")
+const { nanoid } = require("nanoid");
+const { saveToGCP } = require("./google-cloud-stuff.js");
 const isBase64 = require("is-base64");
 const admin = require("firebase-admin");
-const { postImage, getUserID } = require("./database-functions")
+const {
+  postImage,
+  getUserID,
+  newUser,
+  getPictureData,
+  getNanoID,
+} = require("./database-functions");
+const uuid4 = require("uuid4");
 
 const fbapp = admin.initializeApp();
 const defaultAuth = fbapp.auth();
@@ -27,8 +34,8 @@ async function validatePicturePostReq(req, res, next) {
     }
     //verify image
     let imagestring = req.body.image;
-    if (!("image" in req.body)) {
-      res.status(404).send({ message: "image data not found" });
+    if (!("image" in req.body) && !"text") {
+      res.status(404).send({ message: "no data found in body" });
       return;
     }
     if (
@@ -46,7 +53,7 @@ async function validatePicturePostReq(req, res, next) {
   next();
 }
 
-app.use(bodyParser.json({limit:"50mb"}));
+app.use(bodyParser.json({ limit: "50mb" }));
 
 // endpoints
 app.get("/", (req, res) => {
@@ -56,12 +63,11 @@ app.get("/", (req, res) => {
 app.post("/picture", validatePicturePostReq, (req, res) => {
   let output = req.body.image;
   let text;
-  if(req.body.text){
+  if (req.body.text) {
     text = req.body.text;
   }
-  
-  //split the mimetype and data
 
+  //split the mimetype and data
   let filetype = "";
   //get the mimetype
   filetype = output.match("\\w*\\;")[0];
@@ -78,12 +84,11 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
   try {
     saveToGCP(path.join(os.tmpdir(), filename), filename).then((url) => {
       fs.unlinkSync(path.join(os.tmpdir(), filename));
-      
+
       postImage(res.locals.smallID, url, text).then((result) => {
         console.log(result.rows[0].imageurl + " was saved to db");
-        
       });
-      
+
       let response = {
         success: true,
       };
@@ -94,16 +99,80 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
     console.log(err);
   }
 });
+
+async function validateGoogleJWT(req, res, next) {
+  try {
+    let firbaseAuthToken = req.header("Authorization");
+    //comment the debug part out for prod
+    if (firbaseAuthToken == "newUserTest") {
+      res.locals.uid = uuid4();
+      next();
+      return;
+    }
+    if (firbaseAuthToken == "getDataTest") {
+      res.locals.uid = "c80be8a9-0275-4cd4-b8f3-102486a4f65b";
+      next();
+      return;
+    }
+    if (firbaseAuthToken == "getNanoidTest") {
+      res.locals.uid = "c80be8a9-0275-4cd4-b8f3-102486a4f65b";
+      next();
+      return;
+    }
+    // debug ends here
+    let decodedToken = await defaultAuth.verifyIdToken(firebaseAuthToken);
+    const uid = decodedToken.uid;
+    res.locals.uid = uid;
+  } catch (err) {
+    res.status(401).send({ message: err.toString() });
+    return;
+  }
+  next();
+}
+
+app.post("/new_user", validateGoogleJWT, (req, res) => {
+  try {
+    const uid = res.locals.uid;
+    newUser(uid).then((value) => {
+      res.status(200).send({ message: "success", smallID: value });
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .send({ message: "does this user already exist?" + err.toString() });
+  }
+});
+
+app.get("/info", validateGoogleJWT, (req, res) => {
+  try {
+    const uid = res.locals.uid;
+    getPictureData(uid).then((result) => {
+      res.status(200).send(result);
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.toString() });
+  }
+});
+
+app.get("/nanoid", validateGoogleJWT, (req, res) => {
+  try {
+    const uid = res.locals.uid;
+    getNanoID(uid).then((output) => {
+      res.send({smallid: output});
+    })
+    
+  } catch (err) {
+    res.status(500).send({ message: err.toString() });
+  }
+});
 //local test
-/*
-const PORT = 2020
+
+const PORT = 2020;
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
   console.log("Press Ctrl+C to quit.");
 });
 console.log("stuff");
 console.log(process.version);
-*/
+
 exports.app = app;
-
-
