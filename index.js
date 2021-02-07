@@ -136,7 +136,7 @@ async function validateGoogleJWT(req, res, next) {
       return;
     }
     // debug ends here
-    let decodedToken = await defaultAuth.verifyIdToken(firebaseAuthToken);
+    let decodedToken = await defaultAuth.verifyIdToken(firbaseAuthToken);
     const uid = decodedToken.uid;
     res.locals.uid = uid;
   } catch (err) {
@@ -181,8 +181,9 @@ app.get("/nanoid", validateGoogleJWT, (req, res) => {
     res.status(500).send({ message: err.toString() });
   }
 });
-//local test
-/*
+
+
+
 const PORT = 2020;
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
@@ -190,7 +191,7 @@ app.listen(PORT, () => {
 });
 console.log("stuff");
 console.log(process.version);
-*/
+
 
 
 

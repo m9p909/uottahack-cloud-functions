@@ -23,6 +23,9 @@
     "prettier": "^2.2.1",
     "uuid4": "^2.0.2"
   },
+  "devDependencies": {
+    "firebase": "^8.2.6"
+  },
   "scripts": {
     "dev": "nodemon index.js"
   }
