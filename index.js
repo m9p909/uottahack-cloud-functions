@@ -118,19 +118,19 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
 
 async function validateGoogleJWT(req, res, next) {
   try {
-    let firbaseAuthToken = req.header("Authorization");
+    let firebaseAuthToken = req.header("Authorization");
     //comment the debug part out for prod
-    if (firbaseAuthToken == "newUserTest") {
+    if (firebaseAuthToken == "newUserTest") {
       res.locals.uid = uuid4();
       next();
       return;
     }
-    if (firbaseAuthToken == "getDataTest") {
+    if (firebaseAuthToken == "getDataTest") {
       res.locals.uid = "c80be8a9-0275-4cd4-b8f3-102486a4f65b";
       next();
       return;
     }
-    if (firbaseAuthToken == "getNanoidTest") {
+    if (firebaseAuthToken == "getNanoidTest") {
       res.locals.uid = "c80be8a9-0275-4cd4-b8f3-102486a4f65b";
       next();
       return;
