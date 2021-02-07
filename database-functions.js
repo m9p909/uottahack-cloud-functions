@@ -1,5 +1,5 @@
-import pg from "pg";
-import fs from "fs";
+const pg = require('pg')
+const fs = require('fs');
 
 var config = {
   user: "maxroach",
@@ -18,14 +18,15 @@ function getQuery(name) {
   return fs.readFileSync("./sql/" + name).toString();
 }
 
-export async function getUserID(smallId) {
+async function getUserID(smallId) {
   let result = await pool.query(getQuery("getuuid.sql"), [smallId]);
   return result.rows ? result.rows[0].id : null;
 }
 
-export async function postImage(userUUID, url) {
+async function postImage(userUUID, url, text) {
   let result;
-  result = await pool.query(getQuery("postImage.sql"), [userUUID, url]);
+  result = await pool.query(getQuery("postImage.sql"), [userUUID, url, text]);
   return result;
 }
 
+module.exports = {getUserID,postImage};

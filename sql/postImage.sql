@@ -1,3 +1,3 @@
-insert into images(user_id,imageurl)
-values($1,$2)
+insert into images(user_id,imageurl,info)
+values($1,$2, $3)
 returning imageurl

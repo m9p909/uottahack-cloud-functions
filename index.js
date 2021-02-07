@@ -1,14 +1,14 @@
 // Express
-import bodyParser from "body-parser";
-import express from "express";
-import fs from "fs";
-import os from "os";
-import path from "path";
-import { nanoid } from "nanoid";
-import saveToGCP, { annotateImage } from "./google-cloud-stuff.js";
-import isBase64 from "is-base64";
-import admin from "firebase-admin";
-import { postImage, getUserID } from "./database-functions.js";
+const bodyParser = require("body-parser");
+const express = require("express");
+const fs = require("fs");
+const os = require("os")
+const path = require("path");
+const {nanoid} = require("nanoid");
+const {saveToGCP} = require("./google-cloud-stuff.js")
+const isBase64 = require("is-base64");
+const admin = require("firebase-admin");
+const { postImage, getUserID } = require("./database-functions")
 
 const fbapp = admin.initializeApp();
 const defaultAuth = fbapp.auth();
@@ -45,15 +45,21 @@ async function validatePicturePostReq(req, res, next) {
 
   next();
 }
-// endpoints
 
 app.use(bodyParser.json({limit:"50mb"}));
+
+// endpoints
 app.get("/", (req, res) => {
   req.status(200).send("The server is running");
 });
 
 app.post("/picture", validatePicturePostReq, (req, res) => {
   let output = req.body.image;
+  let text;
+  if(req.body.text){
+    text = req.body.text;
+  }
+  
   //split the mimetype and data
 
   let filetype = "";
@@ -72,9 +78,10 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
   try {
     saveToGCP(path.join(os.tmpdir(), filename), filename).then((url) => {
       fs.unlinkSync(path.join(os.tmpdir(), filename));
-      postImage(res.locals.smallID, url).then((result) => {
+      
+      postImage(res.locals.smallID, url, text).then((result) => {
         console.log(result.rows[0].imageurl + " was saved to db");
-        annotateImage(filename).then()
+        
       });
       
       let response = {
@@ -84,13 +91,19 @@ app.post("/picture", validatePicturePostReq, (req, res) => {
     });
   } catch (err) {
     res.status(500).send(err);
+    console.log(err);
   }
 });
-
-const PORT = 4000
+//local test
+/*
+const PORT = 2020
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
   console.log("Press Ctrl+C to quit.");
 });
 console.log("stuff");
 console.log(process.version);
+*/
+exports.app = app;
+
+

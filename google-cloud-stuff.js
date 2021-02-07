@@ -1,9 +1,6 @@
-import Storage from "@google-cloud/storage";
-import axios from "axios";
-import vision from '@google-cloud/vision';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+
+const Storage = require("@google-cloud/storage");
+const vision = require('@google-cloud/vision');
 
 const storage = new Storage.Storage();
 
@@ -11,7 +8,7 @@ const storage = new Storage.Storage();
 // Instantiates a client
 const client = new vision.ImageAnnotatorClient();
 
-export default async function saveToGCP(path, filename) {
+async function saveToGCP(path, filename) {
   const bucketName = "images90";
 
   let response = await storage.bucket(bucketName).upload(path);
@@ -21,7 +18,7 @@ export default async function saveToGCP(path, filename) {
 }
 
 
-export async function annotateImage(filename) {
+async function annotateImage(filename) {
   const features = [{type: 'TEXT_DETECTION'}];
   const textURI = "gs://text90/"+filename;
   const imgURI = "gs://images90/"+filename;
@@ -59,12 +56,13 @@ export async function annotateImage(filename) {
   console.log(`Output written to GCS with prefix: ${destinationUri}`);
 
   //save file to tmp
-  let tmpPath = os.tmpdir()
   let downloadOutput = await storage.bucket('text90').file(filename+"output-1-to-1.json").download()
   downloadOutput = downloadOutput.toString();
   let actualResult = JSON.parse(downloadOutput);
   return actualResult.responses[0].fullTextAnnotation.text;
 
 }
+
+module.exports = {saveToGCP, annotateImage}
 
 
